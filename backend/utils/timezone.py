@@ -1,16 +1,10 @@
-#!/usr/bin/env python3
-# -*- coding: utf-8 -*-
-import zoneinfo
-
-from datetime import datetime
-from datetime import timezone as datetime_timezone
-
+import pytz
+from datetime import datetime, timezone as datetime_timezone
 from backend.core.conf import settings
-
 
 class TimeZone:
     def __init__(self, tz: str = settings.DATETIME_TIMEZONE):
-        self.tz_info = zoneinfo.ZoneInfo(tz)
+        self.tz_info = pytz.timezone(tz)
 
     def now(self) -> datetime:
         """
@@ -48,6 +42,5 @@ class TimeZone:
         :return:
         """
         return dt.astimezone(datetime_timezone.utc)
-
 
 timezone = TimeZone()
