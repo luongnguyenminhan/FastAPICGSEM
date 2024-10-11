@@ -19,7 +19,7 @@ from backend.utils.serializers import MsgSpecJSONResponse, select_as_dict
 
 
 class _AuthenticationError(AuthenticationError):
-    """重写内部认证错误类"""
+    """Override internal authentication error class"""
 
     def __init__(self, *, code: int = None, msg: str = None, headers: dict[str, Any] | None = None):
         self.code = code
@@ -28,11 +28,11 @@ class _AuthenticationError(AuthenticationError):
 
 
 class JwtAuthMiddleware(AuthenticationBackend):
-    """JWT 认证中间件"""
+    """JWT authentication middleware"""
 
     @staticmethod
     def auth_exception_handler(conn: HTTPConnection, exc: _AuthenticationError) -> Response:
-        """覆盖内部认证错误处理"""
+        """Override internal authentication error handler"""
         return MsgSpecJSONResponse(content={'code': exc.code, 'msg': exc.msg, 'data': None}, status_code=exc.code)
 
     async def authenticate(self, request: Request) -> tuple[AuthCredentials, CurrentUserIns] | None:
@@ -60,15 +60,15 @@ class JwtAuthMiddleware(AuthenticationBackend):
                         user.model_dump_json(),
                     )
             else:
-                # TODO: 在恰当的时机，应替换为使用 model_validate_json
+                # TODO: At the appropriate time, replace with model_validate_json
                 # https://docs.pydantic.dev/latest/concepts/json/#partial-json-parsing
                 user = CurrentUserIns.model_validate(from_json(cache_user, allow_partial=True))
         except TokenError as exc:
             raise _AuthenticationError(code=exc.code, msg=exc.detail, headers=exc.headers)
         except Exception as e:
-            log.error(f'JWT 授权异常：{e}')
+            log.error(f'JWT authorization exception: {e}')
             raise _AuthenticationError(code=getattr(e, 'code', 500), msg=getattr(e, 'msg', 'Internal Server Error'))
 
-        # 请注意，此返回使用非标准模式，所以在认证通过时，将丢失某些标准特性
-        # 标准返回模式请查看：https://www.starlette.io/authentication/
+        # Note that this return uses a non-standard mode, so certain standard features will be lost when authentication is successful
+        # For standard return mode, see: https://www.starlette.io/authentication/
         return AuthCredentials(['authenticated']), user

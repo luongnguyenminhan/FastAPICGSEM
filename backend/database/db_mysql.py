@@ -16,11 +16,11 @@ from backend.core.conf import settings
 
 def create_engine_and_session(url: str | URL):
     try:
-        # 数据库引擎
+        # Database engine
         engine = create_async_engine(url, echo=settings.MYSQL_ECHO, future=True, pool_pre_ping=True)
-        # log.success('数据库连接成功')
+        # log.success('Database connection successful')
     except Exception as e:
-        log.error('❌ 数据库链接失败 {}', e)
+        log.error('❌ Database connection failed {}', e)
         sys.exit()
     else:
         db_session = async_sessionmaker(bind=engine, autoflush=False, expire_on_commit=False)
@@ -36,7 +36,7 @@ async_engine, async_db_session = create_engine_and_session(SQLALCHEMY_DATABASE_U
 
 
 async def get_db() -> AsyncSession:
-    """session 生成器"""
+    """Session generator"""
     session = async_db_session()
     try:
         yield session
@@ -52,11 +52,11 @@ CurrentSession = Annotated[AsyncSession, Depends(get_db)]
 
 
 async def create_table():
-    """创建数据库表"""
+    """Create database tables"""
     async with async_engine.begin() as coon:
         await coon.run_sync(MappedBase.metadata.create_all)
 
 
 def uuid4_str() -> str:
-    """数据库引擎 UUID 类型兼容性解决方案"""
+    """UUID type compatibility solution for the database engine"""
     return str(uuid4())

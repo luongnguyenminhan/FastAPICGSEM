@@ -15,7 +15,7 @@ from backend.database.db_redis import redis_client
 
 
 def get_request_ip(request: Request) -> str:
-    """获取请求的 ip 地址"""
+    """Get the IP address of the request"""
     real = request.headers.get('X-Real-IP')
     if real:
         ip = real
@@ -25,7 +25,7 @@ def get_request_ip(request: Request) -> str:
             ip = forwarded.split(',')[0]
         else:
             ip = request.client.host
-    # 忽略 pytest
+    # Ignore pytest
     if ip == 'testclient':
         ip = '127.0.0.1'
     return ip
@@ -33,7 +33,7 @@ def get_request_ip(request: Request) -> str:
 
 async def get_location_online(ip: str, user_agent: str) -> dict | None:
     """
-    在线获取 ip 地址属地，无法保证可用性，准确率较高
+    Get the location of the IP address online, cannot guarantee availability, high accuracy
 
     :param ip:
     :param user_agent:
@@ -47,14 +47,14 @@ async def get_location_online(ip: str, user_agent: str) -> dict | None:
             if response.status_code == 200:
                 return response.json()
         except Exception as e:
-            log.error(f'在线获取 ip 地址属地失败，错误信息：{e}')
+            log.error(f'Failed to get IP address location online, error message: {e}')
             return None
 
 
 @sync_to_async
 def get_location_offline(ip: str) -> dict | None:
     """
-    离线获取 ip 地址属地，无法保证准确率，100%可用
+    Get the location of the IP address offline, cannot guarantee accuracy, 100% available
 
     :param ip:
     :return:
@@ -71,7 +71,7 @@ def get_location_offline(ip: str) -> dict | None:
             'city': data[3] if data[3] != '0' else None,
         }
     except Exception as e:
-        log.error(f'离线获取 ip 地址属地失败，错误信息：{e}')
+        log.error(f'Failed to get IP address location offline, error message: {e}')
         return None
 
 

@@ -2,7 +2,6 @@
 # -*- coding: utf-8 -*-
 import casbin
 import casbin_async_sqlalchemy_adapter
-
 from fastapi import Depends, Request
 
 from backend.app.admin.model import CasbinRule
@@ -17,11 +16,11 @@ class RBAC:
     @staticmethod
     async def enforcer() -> casbin.AsyncEnforcer:
         """
-        获取 casbin 执行器
+        Get the casbin enforcer
 
-        :return:
+        :return: casbin.AsyncEnforcer
         """
-        # 规则数据作为死数据直接在方法内定义
+        # Define the rule data directly within the method
         _CASBIN_RBAC_MODEL_CONF_TEXT = """
         [request_definition]
         r = sub, obj, act
@@ -46,41 +45,41 @@ class RBAC:
 
     async def rbac_verify(self, request: Request, _token: str = DependsJwtAuth) -> None:
         """
-        RBAC 权限校验
+        RBAC permission verification
 
-        :param request:
-        :param _token:
-        :return:
+        :param request: The request object
+        :param _token: The JWT token
+        :return: None
         """
         path = request.url.path
-        # 鉴权白名单
+        # Authorization whitelist
         if path in settings.TOKEN_REQUEST_PATH_EXCLUDE:
             return
-        # JWT 授权状态强制校验
+        # Force JWT authorization status check
         if not request.auth.scopes:
             raise TokenError
-        # 超级管理员免校验
+        # Superuser exemption from verification
         if request.user.is_superuser:
             return
-        # 检测角色数据权限范围
+        # Check role data permission scope
         user_roles = request.user.roles
         if not user_roles:
-            raise AuthorizationError(msg='用户未分配角色，授权失败')
+            raise AuthorizationError(msg='User has not been assigned a role, authorization failed')
         if not any(len(role.menus) > 0 for role in user_roles):
-            raise AuthorizationError(msg='用户所属角色未分配菜单，授权失败')
+            raise AuthorizationError(msg='User\'s roles have not been assigned menus, authorization failed')
         method = request.method
         if method != MethodType.GET or method != MethodType.OPTIONS:
             if not request.user.is_staff:
-                raise AuthorizationError(msg='此用户已被禁止后台管理操作')
-        # 数据权限范围
+                raise AuthorizationError(msg='This user is prohibited from backend management operations')
+        # Data permission scope
         data_scope = any(role.data_scope == 1 for role in user_roles)
         if data_scope:
             return
         user_uuid = request.user.uuid
         if settings.PERMISSION_MODE == 'role-menu':
-            # 角色菜单权限校验
+            # Role menu permission verification
             path_auth_perm = getattr(request.state, 'permission', None)
-            # 没有菜单权限标识不校验
+            # No menu permission identifier, no verification
             if not path_auth_perm:
                 return
             if path_auth_perm in set(settings.RBAC_ROLE_MENU_EXCLUDE):
@@ -93,7 +92,7 @@ class RBAC:
             if path_auth_perm not in allow_perms:
                 raise AuthorizationError
         else:
-            # casbin 权限校验
+            # Casbin permission verification
             if (method, path) in settings.RBAC_CASBIN_EXCLUDE:
                 return
             enforcer = await self.enforcer()
@@ -102,5 +101,5 @@ class RBAC:
 
 
 rbac = RBAC()
-# RBAC 授权依赖注入
+# RBAC authorization dependency injection
 DependsRBAC = Depends(rbac.rbac_verify)

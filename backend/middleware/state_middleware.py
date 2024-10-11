@@ -7,13 +7,13 @@ from backend.utils.request_parse import parse_ip_info, parse_user_agent_info
 
 
 class StateMiddleware(BaseHTTPMiddleware):
-    """请求 state 中间件"""
+    """Request state middleware"""
 
     async def dispatch(self, request: Request, call_next: RequestResponseEndpoint) -> Response:
         ip_info = await parse_ip_info(request)
         ua_info = parse_user_agent_info(request)
 
-        # 设置附加请求信息
+        # Set additional request information
         request.state.ip = ip_info.ip
         request.state.country = ip_info.country
         request.state.region = ip_info.region

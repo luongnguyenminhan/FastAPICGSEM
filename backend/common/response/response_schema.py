@@ -17,7 +17,7 @@ __all__ = ['ResponseModel', 'response_base']
 
 class ResponseModel(BaseModel):
     """
-    统一返回模型
+    Unified response model
 
     E.g. ::
 
@@ -37,7 +37,7 @@ class ResponseModel(BaseModel):
             return ResponseModel(code=res.code, msg=res.msg, data={'test': 'test'})
     """
 
-    # TODO: json_encoders 配置失效: https://github.com/tiangolo/fastapi/discussions/10252
+    # TODO: json_encoders configuration is invalid: https://github.com/tiangolo/fastapi/discussions/10252
     model_config = ConfigDict(json_encoders={datetime: lambda x: x.strftime(settings.DATETIME_FORMAT)})
 
     code: int = CustomResponseCode.HTTP_200.code
@@ -47,11 +47,11 @@ class ResponseModel(BaseModel):
 
 class ResponseBase:
     """
-    统一返回方法
+    Unified response methods
 
     .. tip::
 
-        此类中的方法将返回 ResponseModel 模型，作为一种编码风格而存在；
+        The methods in this class will return the ResponseModel model, existing as a coding style;
 
     E.g. ::
 
@@ -63,11 +63,11 @@ class ResponseBase:
     @staticmethod
     def __response(*, res: CustomResponseCode | CustomResponse = None, data: Any | None = None) -> ResponseModel:
         """
-        请求成功返回通用方法
+        General method for successful request response
 
-        :param res: 返回信息
-        :param data: 返回数据
-        :return:
+        :param res: Response information
+        :param data: Response data
+        :return: ResponseModel
         """
         return ResponseModel(code=res.code, msg=res.msg, data=data)
 
@@ -94,15 +94,15 @@ class ResponseBase:
         data: Any | None = None,
     ) -> Response:
         """
-        此方法是为了提高接口响应速度而创建的，如果返回数据无需进行 pydantic 解析和验证，则推荐使用，相反，请不要使用！
+        This method is created to improve the interface response speed. If the returned data does not need to be parsed and validated by pydantic, it is recommended to use it. Otherwise, please do not use it!
 
         .. warning::
 
-            使用此返回方法时，不要指定接口参数 response_model，也不要在接口函数后添加箭头返回类型
+            When using this return method, do not specify the interface parameter response_model, and do not add an arrow return type after the interface function
 
-        :param res:
-        :param data:
-        :return:
+        :param res: Response information
+        :param data: Response data
+        :return: Response
         """
         return MsgSpecJSONResponse({'code': res.code, 'msg': res.msg, 'data': data})
 

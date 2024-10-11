@@ -5,7 +5,7 @@ import re
 
 def search_string(pattern, text) -> bool:
     """
-    全字段正则匹配
+    Full field regex match
 
     :param pattern:
     :param text:
@@ -20,7 +20,7 @@ def search_string(pattern, text) -> bool:
 
 def match_string(pattern, text) -> bool:
     """
-    从字段开头正则匹配
+    Regex match from the beginning of the field
 
     :param pattern:
     :param text:
@@ -35,7 +35,7 @@ def match_string(pattern, text) -> bool:
 
 def is_phone(text: str) -> bool:
     """
-    检查手机号码
+    Check phone number
 
     :param text:
     :return:

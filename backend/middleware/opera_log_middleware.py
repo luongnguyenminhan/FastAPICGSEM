@@ -20,17 +20,17 @@ from backend.utils.trace_id import get_request_trace_id
 
 
 class OperaLogMiddleware(BaseHTTPMiddleware):
-    """操作日志中间件"""
+    """Operation log middleware"""
 
     async def dispatch(self, request: Request, call_next) -> Response:
-        # 排除记录白名单
+        # Exclude record whitelist
         path = request.url.path
         if path in settings.OPERA_LOG_PATH_EXCLUDE or not path.startswith(f'{settings.FASTAPI_API_V1_PATH}'):
             return await call_next(request)
 
-        # 请求解析
+        # Request parsing
         try:
-            # 此信息依赖于 jwt 中间件
+            # This information depends on the jwt middleware
             username = request.user.username
         except AttributeError:
             username = None
@@ -38,17 +38,17 @@ class OperaLogMiddleware(BaseHTTPMiddleware):
         args = await self.get_request_args(request)
         args = await self.desensitization(args)
 
-        # 执行请求
+        # Execute request
         start_time = timezone.now()
         request_next = await self.execute_request(request, call_next)
         end_time = timezone.now()
         cost_time = (end_time - start_time).total_seconds() * 1000.0
 
-        # 此信息只能在请求后获取
+        # This information can only be obtained after the request
         _route = request.scope.get('route')
         summary = getattr(_route, 'summary', None) or ''
 
-        # 日志创建
+        # Log creation
         opera_log_in = CreateOperaLogParam(
             trace_id=get_request_trace_id(request),
             username=username,
@@ -72,7 +72,7 @@ class OperaLogMiddleware(BaseHTTPMiddleware):
         )
         create_task(OperaLogService.create(obj_in=opera_log_in))  # noqa: ignore
 
-        # 错误抛出
+        # Error throwing
         err = request_next.err
         if err:
             raise err from None
@@ -80,7 +80,7 @@ class OperaLogMiddleware(BaseHTTPMiddleware):
         return request_next.response
 
     async def execute_request(self, request: Request, call_next) -> RequestCallNext:
-        """执行请求"""
+        """Execute request"""
         code = 200
         msg = 'Success'
         status = StatusType.enable
@@ -90,8 +90,8 @@ class OperaLogMiddleware(BaseHTTPMiddleware):
             response = await call_next(request)
             code, msg = self.request_exception_handler(request, code, msg)
         except Exception as e:
-            log.error(f'请求异常: {e}')
-            # code 处理包含 SQLAlchemy 和 Pydantic
+            log.error(f'Request exception: {e}')
+            # Code handling includes SQLAlchemy and Pydantic
             code = getattr(e, 'code', None) or code
             msg = getattr(e, 'msg', None) or msg
             status = StatusType.disable
@@ -101,7 +101,7 @@ class OperaLogMiddleware(BaseHTTPMiddleware):
 
     @staticmethod
     def request_exception_handler(request: Request, code: int, msg: str) -> tuple[str, str]:
-        """请求异常处理器"""
+        """Request exception handler"""
         exception_states = [
             '__request_http_exception__',
             '__request_validation_exception__',
@@ -116,16 +116,16 @@ class OperaLogMiddleware(BaseHTTPMiddleware):
             if exception:
                 code = exception.get('code')
                 msg = exception.get('msg')
-                log.error(f'请求异常: {msg}')
+                log.error(f'Request exception: {msg}')
                 break
         return code, msg
 
     @staticmethod
     async def get_request_args(request: Request) -> dict:
-        """获取请求参数"""
+        """Get request parameters"""
         args = dict(request.query_params)
         args.update(request.path_params)
-        # Tip: .body() 必须在 .form() 之前获取
+        # Tip: .body() must be obtained before .form()
         # https://github.com/encode/starlette/discussions/1933
         body_data = await request.body()
         form_data = await request.form()
@@ -147,7 +147,7 @@ class OperaLogMiddleware(BaseHTTPMiddleware):
     @sync_to_async
     def desensitization(args: dict) -> dict | None:
         """
-        脱敏处理
+        Desensitization processing
 
         :param args:
         :return:

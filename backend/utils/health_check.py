@@ -10,7 +10,7 @@ from backend.common.exception import errors
 
 def ensure_unique_route_names(app: FastAPI) -> None:
     """
-    检查路由名称是否唯一
+    Check if route names are unique
 
     :param app:
     :return:
@@ -25,12 +25,12 @@ def ensure_unique_route_names(app: FastAPI) -> None:
 
 async def http_limit_callback(request: Request, response: Response, expire: int):
     """
-    请求限制时的默认回调函数
+    Default callback function when request limit is reached
 
     :param request:
     :param response:
-    :param expire: 剩余毫秒
+    :param expire: Remaining milliseconds
     :return:
     """
     expires = ceil(expire / 1000)
-    raise errors.HTTPError(code=429, msg='请求过于频繁，请稍后重试', headers={'Retry-After': str(expires)})
+    raise errors.HTTPError(code=429, msg='Too many requests, please try again later', headers={'Retry-After': str(expires)})

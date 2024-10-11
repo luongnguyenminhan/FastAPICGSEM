@@ -14,7 +14,7 @@ class TimeZone:
 
     def now(self) -> datetime:
         """
-        获取时区时间
+        Get the current time in the specified timezone
 
         :return:
         """
@@ -22,7 +22,7 @@ class TimeZone:
 
     def f_datetime(self, dt: datetime) -> datetime:
         """
-        datetime 时间转时区时间
+        Convert a datetime object to the specified timezone
 
         :param dt:
         :return:
@@ -31,7 +31,7 @@ class TimeZone:
 
     def f_str(self, date_str: str, format_str: str = settings.DATETIME_FORMAT) -> datetime:
         """
-        时间字符串转时区时间
+        Convert a date string to a datetime object in the specified timezone
 
         :param date_str:
         :param format_str:
@@ -42,7 +42,7 @@ class TimeZone:
     @staticmethod
     def f_utc(dt: datetime) -> datetime:
         """
-        时区时间转 UTC（GMT）时区
+        Convert a datetime object to UTC (GMT) timezone
 
         :param dt:
         :return:

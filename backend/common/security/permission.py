@@ -8,11 +8,12 @@ from backend.core.conf import settings
 
 class RequestPermission:
     """
-    请求权限，仅用于角色菜单RBAC
+    Request permission, only used for role-menu RBAC
 
     Tip:
-        使用此请求权限时，需要将 `Depends(RequestPermission('xxx'))` 在 `DependsRBAC` 之前设置，
-        因为 fastapi 当前版本的接口依赖注入按正序执行，意味着 RBAC 标识会在验证前被设置
+        When using this request permission, you need to set `Depends(RequestPermission('xxx'))` before `DependsRBAC`,
+        because the current version of FastAPI executes interface dependency injection in order, which means the RBAC
+        identifier will be set before validation.
     """
 
     def __init__(self, value: str):
@@ -22,5 +23,5 @@ class RequestPermission:
         if settings.PERMISSION_MODE == 'role-menu':
             if not isinstance(self.value, str):
                 raise ServerError
-            # 附加权限标识
+            # Attach permission identifier
             request.state.permission = self.value

@@ -15,15 +15,15 @@ from backend.common.log import log
 class AESCipher:
     def __init__(self, key: bytes | str):
         """
-        :param key: 密钥，16/24/32 bytes 或 16 进制字符串
+        :param key: Key, 16/24/32 bytes or hexadecimal string
         """
         self.key = key if isinstance(key, bytes) else bytes.fromhex(key)
 
     def encrypt(self, plaintext: bytes | str) -> bytes:
         """
-        AES 加密
+        AES encryption
 
-        :param plaintext: 加密前的明文
+        :param plaintext: Plaintext before encryption
         :return:
         """
         if not isinstance(plaintext, bytes):
@@ -38,9 +38,9 @@ class AESCipher:
 
     def decrypt(self, ciphertext: bytes | str) -> str:
         """
-        AES 解密
+        AES decryption
 
-        :param ciphertext: 解密前的密文, bytes 或 16 进制字符串
+        :param ciphertext: Ciphertext before decryption, bytes or hexadecimal string
         :return:
         """
         ciphertext = ciphertext if isinstance(ciphertext, bytes) else bytes.fromhex(ciphertext)
@@ -58,9 +58,9 @@ class Md5Cipher:
     @staticmethod
     def encrypt(plaintext: bytes | str) -> str:
         """
-        MD5 加密
+        MD5 encryption
 
-        :param plaintext: 加密前的明文
+        :param plaintext: Plaintext before encryption
         :return:
         """
         import hashlib
@@ -75,15 +75,15 @@ class Md5Cipher:
 class ItsDCipher:
     def __init__(self, key: bytes | str):
         """
-        :param key: 密钥，16/24/32 bytes 或 16 进制字符串
+        :param key: Key, 16/24/32 bytes or hexadecimal string
         """
         self.key = key if isinstance(key, bytes) else bytes.fromhex(key)
 
     def encrypt(self, plaintext: Any) -> str:
         """
-        ItsDangerous 加密 (可能失败，如果 plaintext 无法序列化，则会加密为 MD5)
+        ItsDangerous encryption (may fail, if plaintext cannot be serialized, it will be encrypted as MD5)
 
-        :param plaintext: 加密前的明文
+        :param plaintext: Plaintext before encryption
         :return:
         """
         serializer = URLSafeSerializer(self.key)
@@ -96,9 +96,9 @@ class ItsDCipher:
 
     def decrypt(self, ciphertext: str) -> Any:
         """
-        ItsDangerous 解密 (可能失败，如果 ciphertext 无法反序列化，则解密失败, 返回原始密文)
+        ItsDangerous decryption (may fail, if ciphertext cannot be deserialized, decryption fails, returns original ciphertext)
 
-        :param ciphertext: 解密前的密文
+        :param ciphertext: Ciphertext before decryption
         :return:
         """
         serializer = URLSafeSerializer(self.key)
